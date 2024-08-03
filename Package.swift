@@ -7,7 +7,9 @@ let package = Package(
     .plugin(name: "SwiftGenPlugin", targets: ["SwiftGenPlugin"]),
     .plugin(name: "SwiftGen-Generate", targets: ["SwiftGen-Generate"])
   ],
-  dependencies: [],
+  dependencies: [
+    .package(url: "https://github.com/SwiftGen/SwiftGen.git", from: "6.6.3")
+  ],
   targets: [
     .plugin(
       name: "SwiftGenPlugin",
@@ -27,11 +29,11 @@ let package = Package(
       ),
       dependencies: ["swiftgen"]
     ),
-    .binaryTarget(
-      name: "swiftgen",
-      url: "https://github.com/SwiftGen/SwiftGen/releases/download/6.6.2/swiftgen-6.6.2.artifactbundle.zip",
-      checksum: "7586363e24edcf18c2da3ef90f379e9559c1453f48ef5e8fbc0b818fbbc3a045"
-    )
+//    .binaryTarget(
+//      name: "swiftgen",
+//      url: "https://github.com/SwiftGen/SwiftGen/releases/download/6.6.2/swiftgen-6.6.2.artifactbundle.zip",
+//      checksum: "7586363e24edcf18c2da3ef90f379e9559c1453f48ef5e8fbc0b818fbbc3a045"
+//    )
   ],
   swiftLanguageVersions: [.v5, .v6]
 )
