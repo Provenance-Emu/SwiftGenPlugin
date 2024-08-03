@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
@@ -32,5 +32,6 @@ let package = Package(
       url: "https://github.com/SwiftGen/SwiftGen/releases/download/6.6.2/swiftgen-6.6.2.artifactbundle.zip",
       checksum: "7586363e24edcf18c2da3ef90f379e9559c1453f48ef5e8fbc0b818fbbc3a045"
     )
-  ]
+  ],
+  swiftLanguageVersions: [.v5, .v6]
 )

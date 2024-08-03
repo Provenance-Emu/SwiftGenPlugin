@@ -93,6 +93,22 @@ private extension SwiftGenPlugin {
 
 private extension Command {
   static func swiftgen(using configuration: Path, context: PluginContext, target: Target) throws -> Command {
+//    .prebuildCommand(
+//        displayName: "SwiftGen BuildTool Plugin",
+//        executable: try context.tool(named: "swiftgen").url,
+//        arguments: [
+//            "config",
+//            "run",
+//            "--verbose",
+//            "--config", "\(configuration)"
+//        ],
+//        environment:  [
+//            "PROJECT_DIR": context.package.directoryURL.path,
+//            "TARGET_NAME": target.name,
+//            "PRODUCT_MODULE_NAME": target.moduleName,
+//            "DERIVED_SOURCES_DIR": context.pluginWorkDirectoryURL.path
+//        ],
+//        outputFilesDirectory: context.pluginWorkDirectoryURL)
     .prebuildCommand(
       displayName: "SwiftGen BuildTool Plugin",
       executable: try context.tool(named: "swiftgen").path,
