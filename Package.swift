@@ -7,9 +7,7 @@ let package = Package(
     .plugin(name: "SwiftGenPlugin", targets: ["SwiftGenPlugin"]),
     .plugin(name: "SwiftGen-Generate", targets: ["SwiftGen-Generate"])
   ],
-  dependencies: [
-//    .package(url: "https://github.com/SwiftGen/SwiftGen.git", from: "6.6.3")
-  ],
+  dependencies: [],
   targets: [
     .plugin(
       name: "SwiftGenPlugin",
