@@ -13,9 +13,9 @@ struct SwiftGenPlugin: BuildToolPlugin {
     let fileManager = FileManager.default
 
     // Possible paths where there may be a config file (root of package, target dir.)
-    let configurations: [Path] = [context.package.directory, target.directory]
-      .map { $0.appending("swiftgen.yml") }
-      .filter { fileManager.fileExists(atPath: $0.string) }
+    let configurations: [URL] = [context.package.directoryURL, target.directoryURL]
+      .map { $0.appending(path: "swiftgen.yml") }
+      .filter { fileManager.fileExists(atPath: $0.path) }
 
     // Validate paths list
     guard validate(configurations: configurations, target: target) else {
@@ -23,7 +23,7 @@ struct SwiftGenPlugin: BuildToolPlugin {
     }
 
     // Clear the SwiftGen plugin's directory (in case of dangling files)
-    fileManager.forceClean(directory: context.pluginWorkDirectory)
+    fileManager.forceClean(directory: context.pluginWorkDirectoryURL)
 
     return try configurations.map { configuration in
       try .swiftgen(using: configuration, context: context, target: target)
@@ -39,9 +39,9 @@ extension SwiftGenPlugin: XcodeBuildToolPlugin {
     let fileManager = FileManager.default
 
     // Possible paths where there may be a config file (root of package, target dir.)
-    let configurations: [Path] = [context.xcodeProject.directory]
-      .map { $0.appending("swiftgen.yml") }
-      .filter { fileManager.fileExists(atPath: $0.string) }
+    let configurations: [URL] = [context.xcodeProject.directoryURL]
+      .map { $0.appending(path: "swiftgen.yml") }
+      .filter { fileManager.fileExists(atPath: $0.path) }
 
     // Validate paths list
     guard validate(configurations: configurations, target: target) else {
@@ -49,7 +49,7 @@ extension SwiftGenPlugin: XcodeBuildToolPlugin {
     }
 
     // Clear the SwiftGen plugin's directory (in case of dangling files)
-    fileManager.forceClean(directory: context.pluginWorkDirectory)
+    fileManager.forceClean(directory: context.pluginWorkDirectoryURL)
 
     return try configurations.map { configuration in
       try .swiftgen(using: configuration, context: context, target: target)
@@ -62,7 +62,7 @@ extension SwiftGenPlugin: XcodeBuildToolPlugin {
 
 private extension SwiftGenPlugin {
   /// Validate the given list of configurations
-  func validate(configurations: [Path], target: Target) -> Bool {
+  func validate(configurations: [URL], target: Target) -> Bool {
     guard !configurations.isEmpty else {
       Diagnostics.error("""
       No SwiftGen configurations found for target \(target.name). If you would like to generate sources for this \
@@ -76,7 +76,7 @@ private extension SwiftGenPlugin {
   }
 
 #if canImport(XcodeProjectPlugin)
-  func validate(configurations: [Path], target: XcodeTarget) -> Bool {
+  func validate(configurations: [URL], target: XcodeTarget) -> Bool {
     guard !configurations.isEmpty else {
       Diagnostics.error("""
         No SwiftGen configurations found for target \(target.displayName). If you would like to generate sources for this \
@@ -92,59 +92,43 @@ private extension SwiftGenPlugin {
 }
 
 private extension Command {
-  static func swiftgen(using configuration: Path, context: PluginContext, target: Target) throws -> Command {
-//    .prebuildCommand(
-//        displayName: "SwiftGen BuildTool Plugin",
-//        executable: try context.tool(named: "swiftgen").url,
-//        arguments: [
-//            "config",
-//            "run",
-//            "--verbose",
-//            "--config", "\(configuration)"
-//        ],
-//        environment:  [
-//            "PROJECT_DIR": context.package.directoryURL.path,
-//            "TARGET_NAME": target.name,
-//            "PRODUCT_MODULE_NAME": target.moduleName,
-//            "DERIVED_SOURCES_DIR": context.pluginWorkDirectoryURL.path
-//        ],
-//        outputFilesDirectory: context.pluginWorkDirectoryURL)
+  static func swiftgen(using configuration: URL, context: PluginContext, target: Target) throws -> Command {
     .prebuildCommand(
       displayName: "SwiftGen BuildTool Plugin",
-      executable: try context.tool(named: "swiftgen").path,
+      executable: try context.tool(named: "swiftgen").url,
       arguments: [
         "config",
         "run",
         "--verbose",
-        "--config", "\(configuration)"
+        "--config", configuration.path
       ],
       environment: [
-        "PROJECT_DIR": context.package.directory,
+        "PROJECT_DIR": context.package.directoryURL.path,
         "TARGET_NAME": target.name,
         "PRODUCT_MODULE_NAME": target.moduleName,
-        "DERIVED_SOURCES_DIR": context.pluginWorkDirectory
+        "DERIVED_SOURCES_DIR": context.pluginWorkDirectoryURL.path
       ],
-      outputFilesDirectory: context.pluginWorkDirectory
+      outputFilesDirectory: context.pluginWorkDirectoryURL
     )
   }
 
 #if canImport(XcodeProjectPlugin)
-  static func swiftgen(using configuration: Path, context: XcodePluginContext, target: XcodeTarget) throws -> Command {
+  static func swiftgen(using configuration: URL, context: XcodePluginContext, target: XcodeTarget) throws -> Command {
     .prebuildCommand(
       displayName: "SwiftGen BuildTool Plugin",
-      executable: try context.tool(named: "swiftgen").path,
+      executable: try context.tool(named: "swiftgen").url,
       arguments: [
         "config",
         "run",
         "--verbose",
-        "--config", "\(configuration)"
+        "--config", configuration.path
       ],
       environment: [
-        "PROJECT_DIR": context.xcodeProject.directory,
+        "PROJECT_DIR": context.xcodeProject.directoryURL.path,
         "TARGET_NAME": target.displayName,
-        "DERIVED_SOURCES_DIR": context.pluginWorkDirectory
+        "DERIVED_SOURCES_DIR": context.pluginWorkDirectoryURL.path
       ],
-      outputFilesDirectory: context.pluginWorkDirectory
+      outputFilesDirectory: context.pluginWorkDirectoryURL
     )
   }
 #endif
@@ -152,9 +136,9 @@ private extension Command {
 
 private extension FileManager {
   /// Re-create the given directory
-  func forceClean(directory: Path) {
-    try? removeItem(atPath: directory.string)
-    try? createDirectory(atPath: directory.string, withIntermediateDirectories: false)
+  func forceClean(directory: URL) {
+    try? removeItem(at: directory)
+    try? createDirectory(at: directory, withIntermediateDirectories: false)
   }
 }
 
