@@ -13,7 +13,7 @@ struct SwiftGenPlugin: BuildToolPlugin {
     let fileManager = FileManager.default
 
     // Possible paths where there may be a config file (root of package, target dir.)
-    let configurations: [URL] = [context.package.directoryURL, target.directoryURL]
+    let configurations: [URL] = [context.package.directoryURL, URL(filePath: "\(target.directory)")]
       .map { $0.appending(path: "swiftgen.yml") }
       .filter { fileManager.fileExists(atPath: $0.path) }
 
