@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 import PackageDescription
 
 let package = Package(
@@ -33,5 +33,5 @@ let package = Package(
       checksum: "caf1feaf93dd32bc5037f0b6ded8d0f4fe28ab5d2f6e5c3edf2572006ba0b7eb"
     )
   ],
-  swiftLanguageVersions: [.v5, .v6]
+  swiftLanguageModes: [.v5, .v6]
 )
