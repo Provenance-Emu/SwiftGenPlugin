@@ -12,9 +12,9 @@ struct SwiftGenPlugin: CommandPlugin {
   func performCommand(context: PluginContext, arguments: [String]) async throws {
     let swiftgen = try context.tool(named: "swiftgen")
     let fileManager = FileManager.default
-    
-    let configuration = context.package.directory.appending("swiftgen.yml")
-    if fileManager.fileExists(atPath: configuration.string) {
+
+    let configuration = context.package.directoryURL.appending(path: "swiftgen.yml")
+    if fileManager.fileExists(atPath: configuration.path) {
       try swiftgen.run(configuration, environment: env(context: context))
     }
 
@@ -24,8 +24,8 @@ struct SwiftGenPlugin: CommandPlugin {
       .compactMap { $0 as? SourceModuleTarget }
       .filter { targetsFromArgs.isEmpty || targetsFromArgs.contains($0.name) }
     for target in targets {
-      let configuration = target.directory.appending("swiftgen.yml")
-      if fileManager.fileExists(atPath: configuration.string) {
+      let configuration = target.directoryURL.appending(path: "swiftgen.yml")
+      if fileManager.fileExists(atPath: configuration.path) {
         try swiftgen.run(configuration, environment: env(context: context, target: target))
       }
     }
@@ -36,13 +36,13 @@ private extension SwiftGenPlugin {
   // Environment content for correct code generation
   func env(context: PluginContext, target: SourceModuleTarget? = nil) -> [String: String] {
     [
-      "PROJECT_DIR": context.package.directory.string,
+      "PROJECT_DIR": context.package.directoryURL.path,
       "TARGET_NAME": target?.name ?? "",
       "PRODUCT_MODULE_NAME": target?.moduleName ?? "",
-      "DERIVED_SOURCES_DIR": context.pluginWorkDirectory.string
+      "DERIVED_SOURCES_DIR": context.pluginWorkDirectoryURL.path
     ]
   }
-    
+
   func parseTargets(_ arguments: [String]) -> [String] {
     var result = [String]()
     for (i, arg) in arguments.enumerated() where arg == "--target" {
@@ -57,13 +57,13 @@ private extension SwiftGenPlugin {
 
 private extension PluginContext.Tool {
   /// Invoke the tool with the given configuration
-  func run(_ configuration: Path, environment: [String: String]) throws {
+  func run(_ configuration: URL, environment: [String: String]) throws {
     try run(
       arguments: [
         "config",
         "run",
         "--config",
-        configuration.string
+        configuration.path
       ],
       environment: environment
     )
@@ -72,7 +72,7 @@ private extension PluginContext.Tool {
   /// Invoke the tool with given list of arguments
   func run(arguments: [String], environment: [String: String]) throws {
     let task = Process()
-    task.executableURL = URL(fileURLWithPath: path.string)
+    task.executableURL = url
     task.arguments = arguments
     task.environment = environment
 
